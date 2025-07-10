@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanji Quiz Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to bottom, #b179b9, #b179b9);
+    }
+
+    header {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+
+    .rectangle {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: rgb(214, 169, 56);
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .header-content img {
+      height: 80px;
+    }
+
+    .header-content h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: white;
+    }
+
+    .kanji {
+      font-size: 6em;
+      margin: 20px;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .score {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #fff;
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-weight: bold;
+      color: white;
+    }
+
+    #restartBtn {
+      display: block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: rgb(214, 169, 56);
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="rectangle"></div>
+    <div class="header-content">
+    
+      <h1>Kanji Quiz Game</h1>
+    </div>
+  </header>
+
+  <div class="kanji" id="kanji">?</div>
+  <div class="choices" id="choices"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="score" id="score">Score: 0</div>
+  <div class="score" id="timer">Timer - 00:00</div>
+  <button id="restartBtn" onclick="startGame()">Restart</button>
+
+<script>
+  const kanjiList = [
+    { kanji: "月", reading: "つき - قمر" },
+    { kanji: "火", reading: "ひ - نار" },
+    { kanji: "水", reading: "みず - ماء" },
+    { kanji: "木", reading: "き - شجرة" },
+    { kanji: "金", reading: "かね - مال، ذهب" },
+    { kanji: "土", reading: "つち - تربة" },
+    { kanji: "日", reading: "にち - شمس، يوم" },
+    { kanji: "本", reading: "ほん - كتاب، أصل" },
+    { kanji: "万", reading: "まん - عشرة آلاف" },
+    { kanji: "円", reading: "えん - ين (عملة)، دائرة" },
+    { kanji: "百", reading: "ひゃく - مائة" },
+    { kanji: "千", reading: "せん - ألف" },
+    { kanji: "時", reading: "とき - وقت" },
+    { kanji: "分", reading: "ふん - دقيقة، جزء" },
+    { kanji: "半", reading: "はん - نصف" },
+    { kanji: "一", reading: "いち - واحد" },
+    { kanji: "二", reading: "に - اثنان" },
+    { kanji: "三", reading: "さん - ثلاثة" },
+    { kanji: "四", reading: "し/よん - أربعة" },
+    { kanji: "五", reading: "ご - خمسة" },
+    { kanji: "六", reading: "ろく - ستة" },
+    { kanji: "七", reading: "しち/なな - سبعة" },
+    { kanji: "八", reading: "はち - ثمانية" },
+    { kanji: "九", reading: "きゅう/く - تسعة" },
+    { kanji: "十", reading: "じゅう - عشرة" },
+    { kanji: "手", reading: "て - يد" },
+    { kanji: "父", reading: "ちち - أب" },
+    { kanji: "母", reading: "はは - أم" },
+    { kanji: "私", reading: "わたし - أنا" },
+    { kanji: "花", reading: "はな - زهرة" },
+    { kanji: "大", reading: "だい/おお - كبير" },
+    { kanji: "小", reading: "しょう/ちい - صغير" },
+    { kanji: "新", reading: "しん - جديد" },
+    { kanji: "古", reading: "ふる - قديم" },
+    { kanji: "聞", reading: "き - سماع" },
+    { kanji: "上", reading: "うえ - أعلى" },
+    { kanji: "下", reading: "した - أسفل" },
+    { kanji: "安", reading: "やす - رخيص، آمن" },
+    { kanji: "高", reading: "たか - مرتفع، غالي" },
+    { kanji: "好", reading: "す - محبوب" },
+    { kanji: "女", reading: "おんな - أنثى" },
+    { kanji: "男", reading: "おとこ - ذكر" },
+    { kanji: "間", reading: "あいだ - بين، فترة" },
+    { kanji: "右", reading: "みぎ - يمين" },
+    { kanji: "左", reading: "ひだり - يسار" },
+    { kanji: "人", reading: "ひと - شخص" },
+    { kanji: "国", reading: "くに - بلد" },
+    { kanji: "外", reading: "そと - خارج" },
+    { kanji: "中", reading: "なか - داخل" },
+    { kanji: "多", reading: "おお - كثير" },
+    { kanji: "少", reading: "すこ - قليل" },
+    { kanji: "学", reading: "がく - دراسة" },
+    { kanji: "先", reading: "さき - قبل، مقدمة" },
+    { kanji: "生", reading: "せい - حياة" },
+    { kanji: "子", reading: "こ - طفل" },
+    { kanji: "何", reading: "なに - ماذا" },
+    { kanji: "食", reading: "た - أكل" },
+    { kanji: "飲", reading: "の - شرب" },
+    { kanji: "書", reading: "か - كتابة" },
+    { kanji: "見", reading: "み - رؤية" },
+    { kanji: "読", reading: "よ - قراءة" },
+    { kanji: "語", reading: "ご - لغة" },
+    { kanji: "入", reading: "はい - دخول" },
+    { kanji: "出", reading: "で - خروج" },
+    { kanji: "体", reading: "からだ - جسم" },
+    { kanji: "足", reading: "あし - قدم" },
+    { kanji: "目", reading: "め - عين" },
+    { kanji: "耳", reading: "みみ - أذن" },
+    { kanji: "口", reading: "くち - فم" },
+    { kanji: "行", reading: "い - ذهاب" },
+    { kanji: "来", reading: "く - مجيء" },
+    { kanji: "会", reading: "あ - لقاء" },
+    { kanji: "話", reading: "はなし - حديث" },
+    { kanji: "社", reading: "しゃ - شركة" },
+    { kanji: "前", reading: "まえ - أمام" },
+    { kanji: "後", reading: "うしろ - خلف" },
+    { kanji: "午", reading: "ご - ظهر" },
+    { kanji: "名", reading: "な - اسم" },
+    { kanji: "年", reading: "とし - سنة" },
+    { kanji: "山", reading: "やま - جبل" },
+    { kanji: "川", reading: "かわ - نهر" },
+    { kanji: "立", reading: "た - وقوف" },
+    { kanji: "元", reading: "もと - أصل" },
+    { kanji: "気", reading: "き - طاقة" },
+    { kanji: "車", reading: "くるま - سيارة" },
+    { kanji: "今", reading: "いま - الآن" },
+    { kanji: "物", reading: "もの - شيء" },
+    { kanji: "買", reading: "か - شراء" },
+    { kanji: "電", reading: "でん - كهرباء" },
+    { kanji: "力", reading: "ちから - قوة" },
+    { kanji: "雨", reading: "あめ - مطر" },
+    { kanji: "友", reading: "とも - صديق" },
+    { kanji: "方", reading: "かた - اتجاه" },
+    { kanji: "言", reading: "い - قول" },
+    { kanji: "茶", reading: "ちゃ - شاي" },
+    { kanji: "魚", reading: "さかな - سمك" },
+    { kanji: "石", reading: "いし - حجر" },
+    { kanji: "牛", reading: "うし - بقرة" },
+    { kanji: "鳥", reading: "とり - طائر" },
+    { kanji: "長", reading: "なが - طويل" },
+    { kanji: "暗", reading: "くら - مظلم" },
+    { kanji: "明", reading: "あか - مضيء" },
+    { kanji: "校", reading: "こう - مدرسة" },
+    { kanji: "帰", reading: "かえ - عودة" },
+    { kanji: "田", reading: "た - حقل أرز" },
+    { kanji: "米", reading: "こめ - أرز" },
+    { kanji: "林", reading: "はやし - غابة صغيرة" },
+    { kanji: "森", reading: "もり - غابة" },
+    { kanji: "寺", reading: "てら - معبد" },
+    { kanji: "町", reading: "まち - بلدة" },
+    { kanji: "北", reading: "きた - شمال" },
+    { kanji: "南", reading: "みなみ - جنوب" },
+    { kanji: "東", reading: "ひがし - شرق" },
+    { kanji: "西", reading: "にし - غرب" },
+    { kanji: "夕", reading: "ゆう - مساء" },
+    { kanji: "岩", reading: "いわ - صخرة" },
+    { kanji: "竹", reading: "たけ - خيزران" },
+    { kanji: "貝", reading: "かい - محار" },
+    { kanji: "肉", reading: "にく - لحم" }
+];
+
+  let score = 0;
+  let currentQuestion = {};
+  let shuffledQuestions = [];
+  let answered = [];
+
+  let timeLimit = 30 * 60 ; // 1 minute
+  let timeLeft = timeLimit;
+  let timerInterval;
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+function resetGame() {
+  score = 0;
+  answered = [];
+  shuffledQuestions = shuffle([...kanjiList]); 
+  document.getElementById("score").textContent = `Score: ${score}`;
+  document.getElementById("feedback").textContent = "";
+  timeLeft = timeLimit;
+  pickQuestion();
+}
+  function pickQuestion() {
+    document.getElementById("feedback").textContent = "";
+
+    if (answered.length === kanjiList.length) { // change number here
+      document.getElementById("kanji").textContent = "🎉";
+      document.getElementById("choices").innerHTML = "";
+      document.getElementById("feedback").textContent = "Congratulations! You answered all correctly!";
+      clearInterval(timerInterval);
+      return;
+    }
+
+    if (shuffledQuestions.length === 0) {
+      shuffledQuestions = shuffle(kanjiList.filter(k => !answered.includes(k.kanji)));
+    }
+
+    currentQuestion = shuffledQuestions.pop();
+    document.getElementById("kanji").textContent = currentQuestion.kanji;
+
+    const otherReadings = shuffle(kanjiList.filter(k => k.reading !== currentQuestion.reading));
+    const options = shuffle([
+      currentQuestion.reading,
+      otherReadings[0].reading,
+      otherReadings[1].reading
+    ]);
+
+    const choicesDiv = document.getElementById("choices");
+    choicesDiv.innerHTML = "";
+    options.forEach(option => {
+      const btn = document.createElement("button");
+      btn.textContent = option;
+      btn.onclick = () => checkAnswer(option);
+      choicesDiv.appendChild(btn);
+    });
+  }
+
+  function checkAnswer(answer) {
+    if (answer === currentQuestion.reading) {
+      score++;
+      if (!answered.includes(currentQuestion.kanji)) {
+        answered.push(currentQuestion.kanji);
+      }
+      document.getElementById("feedback").textContent = "Correct!";
+      document.getElementById("score").textContent = `Score: ${score}`;
+      setTimeout(pickQuestion, 1000);
+    } else {
+      document.getElementById("feedback").textContent = `Wrong! Correct was: ${currentQuestion.reading}`;
+      document.getElementById("score").textContent = `Score: ${score}`;
+      setTimeout(pickQuestion, 2000);
+    }
+  }
+
+function updateTimer() {
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    document.getElementById("feedback").textContent =
+      `⏰ Time's up! Final score: ${score} out of 119`;
+    return;
+  }
+
+  const min = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const sec = String(timeLeft % 60).padStart(2, '0');
+  document.getElementById("timer").textContent = `Timer - ${min}:${sec}`;
+  timeLeft--;
+}
+
+  function startGame() {
+    resetGame();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+  }
+
+  startGame();
+</script>
+
+</body>
+</html>
